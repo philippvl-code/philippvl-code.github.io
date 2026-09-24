@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Workshop</title>
+  <meta name="description" content="Philipp von Lintel's workshop: small ideas and experiments.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500&display=swap">
+  <style>
+    :root {
+      --bg: #0b0b0c;
+      --panel: #161618;
+      --panel-hover: #1d1d20;
+      --line: #2a2a2e;
+      --fg: #f2f2f2;
+      --muted: #8a8a8f;
+      --accent: #ff3b30;
+      --display: Futura, "Futura PT", "Jost", "Century Gothic", sans-serif;
+      --mono: ui-monospace, "SF Mono", Menlo, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--mono);
+      padding: 56px 16px 80px;
+    }
+    main { max-width: 1040px; margin: 0 auto; }
+
+    header { display: flex; justify-content: space-between; align-items: end; gap: 24px; flex-wrap: wrap; margin-bottom: 48px; }
+    h1 {
+      font-family: var(--display);
+      font-weight: 500;
+      font-size: clamp(48px, 10vw, 104px);
+      line-height: .9;
+      letter-spacing: -.02em;
+      margin: 0;
+    }
+    h1 .dot { color: var(--accent); }
+    .intro { color: var(--muted); font-size: 13px; line-height: 1.6; max-width: 34ch; margin: 0; }
+    .count { color: var(--fg); }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+
+    .card {
+      position: relative;
+      background: var(--panel);
+      border: 1px solid transparent;
+      border-radius: 14px;
+      padding: 22px 22px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-height: 250px;
+      transition: background .15s, border-color .15s, transform .15s;
+    }
+    .card:hover { background: var(--panel-hover); border-color: var(--line); transform: translateY(-2px); }
+    .card:focus-within { border-color: var(--muted); }
+
+    .top { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); letter-spacing: .06em; }
+    .num { color: var(--fg); }
+    .card h2 { font-family: var(--display); font-weight: 500; font-size: 30px; line-height: 1.05; margin: 4px 0 0; }
+    /* The title link stretches over the whole card so clicking anywhere opens the project. */
+    .card h2 a { color: inherit; text-decoration: none; }
+    .card h2 a::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+    .card h2 a:focus-visible { outline: none; }
+    .card p { color: var(--muted); font-size: 13px; line-height: 1.6; margin: 0; flex: 1; }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag { font-size: 11px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 3px 9px; }
+
+    .links { display: flex; flex-wrap: wrap; gap: 8px; position: relative; z-index: 1; }
+    .links a {
+      font-size: 12px;
+      color: var(--fg);
+      text-decoration: none;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 7px 11px;
+    }
+    .links a:hover { border-color: var(--fg); }
+    .links a:first-child { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+
+    footer { margin-top: 56px; color: var(--muted); font-size: 12px; }
+    footer a { color: var(--fg); }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Workshop<span class="dot">.</span></h1>
+      <p class="intro">Small ideas and experiments by Philipp von Lintel. <span class="count" id="count"></span></p>
+    </header>
+
+    <section class="grid" id="grid"></section>
+
+    <footer>Code for everything here is on <a href="https://github.com/philippvl-code">GitHub</a>.</footer>
+  </main>
+
+  <script src="projects.js"></script>
+  <script>
+    const grid = document.getElementById("grid");
+    const fmt = d => new Date(d + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+    const el = (tag, cls, text) => {
+      const e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (text != null) e.textContent = text;
+      return e;
+    };
+
+    const total = PROJECTS.length;
+    document.getElementById("count").textContent = total + (total === 1 ? " project." : " projects.");
+
+    PROJECTS.forEach((p, i) => {
+      const card = el("article", "card");
+
+      const top = el("div", "top");
+      top.append(el("span", "num", String(total - i).padStart(2, "0")), el("span", null, fmt(p.date)));
+
+      const h2 = el("h2");
+      const a = el("a", null, p.title);
+      a.href = p.url;
+      h2.append(a);
+
+      const tags = el("div", "tags");
+      (p.tags || []).forEach(t => tags.append(el("span", "tag", t)));
+
+      const links = el("div", "links");
+      (p.links || []).forEach(l => {
+        const la = el("a", null, l.label);
+        la.href = l.url;
+        links.append(la);
+      });
+
+      card.append(top, h2, el("p", null, p.description), tags, links);
+      grid.append(card);
+    });
+  </script>
+</body>
+</html>
